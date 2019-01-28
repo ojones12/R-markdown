@@ -1,0 +1,177 @@
+---
+title: "Untitled"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+obsmarfis <- seacucumber.match.trips()
+obsmarfis$doy <- yday(obsmarfis$landed_date)
+coast<- load.shapefile(DS = 'coastline')
+nafo <- load.shapefile(DS= 'nafo')
+fa <- load.shapefile(DS = 'sea.cucumber.fa')
+coast.points = fortify(coast, region="Province")
+nafo.points = fortify(nafo, region="ZONE")
+fa.points = fortify(fa, region = "fzone")
+scaleFUN <- function(x) sprintf("%.2f", x)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, p1, echo = FALSE}
+
+ggplot(subset(obsmarfis, obsmarfis$zone == "SWNB"), aes(x = lon, y = lat)) +
+        coord_map(xlim = c(-67, -66.85), ylim = c(45.1, 45)) +
+        geom_polygon(data = fa, aes(x = long, y = lat, group = group), fill = NA, colour = "red", size = 0.2) +
+        geom_polygon(data = nafo, aes(x = long, y = lat, group = group), fill = NA, colour = "grey20", size = 0.2) +
+        geom_point(aes(col = observed), size = 0.8) +
+        scale_color_manual(values = c("black", "green"),
+                           name = "Observed") +
+        scale_shape_manual(values = 16) +
+        theme_bw () + 
+        theme (axis.text.x = element_text(size = 7),
+               axis.text.y = element_text(size = 7),
+               legend.text = element_text(size = 10),
+               panel.grid.major = element_blank(),
+               plot.title = element_text(size = 12, hjust = 0.5)) + 
+        ggtitle("Distribution of observer trips, SWNB") +
+        scale_y_continuous(breaks = c(45, 45.05, 45.1),
+                          labels = parse(text = c("45 * degree * N", "NA", "45.1 * degree * N"))) +
+        scale_x_continuous(breaks = c(-66.9, -67),                                                                                                 labels = parse(text = c("66.9 * degree * W", "NA"))) +
+      facet_wrap(~f.year, ncol = 5) +
+        ylab("") +
+        xlab("") 
+```
+
+
+```{r, p2, echo = FALSE}
+
+ggplot(subset(obsmarfis, obsmarfis$zone == "4W"), aes(x = lon, y = lat)) +
+coord_map(xlim = c(-62, -59), ylim = c(45.1, 43.8)) +
+geom_polygon(data = fa, aes(x = long, y = lat, group = group), fill = NA, colour = "red") +
+geom_polygon(data = nafo, aes(x = long, y = lat, group = group), fill = NA, colour = "grey20")  +
+geom_point(aes(col = observed), size = 1.2) +
+scale_color_manual(values = c("black", "green"),
+                    name = "Observed") + 
+theme_bw () + 
+theme(axis.text.x = element_text(size = 6),
+      axis.text.y = element_text(size = 7.5),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_blank(),
+      plot.title = element_text(size = 12, hjust = 0.5)) + 
+      ggtitle("Distribution of observer trips, 4W") +
+      scale_y_continuous(breaks = c(44, 45),
+                        labels = parse(text = c("44 * degree * N", "45 * degree * N"))) +
+      scale_x_continuous(breaks = c(-59, -60, -61, -62),
+                         labels = parse(text = c("NA", "60 * degree * W", "61 * degree * W", "NA"))) +
+      facet_wrap(~f.year) +
+      ylab("") +
+      xlab("")
+```
+```{r, p3, echo=FALSE}
+
+ggplot(subset(obsmarfis, obsmarfis$zone == "4Vs"), aes(x = lon, y = lat)) +
+coord_map(xlim = c(-60.2, -57.5), ylim = c(45, 43.8)) + 
+geom_polygon(data = fa, aes(x = long, y = lat, group = group), fill = NA, colour = "red", size = 0.2) +
+geom_polygon(data = nafo, aes(x = long, y = lat, group = group), fill = NA, colour = "grey20", size = 0.2)  +
+geom_point(aes(col = observed)) +
+scale_color_manual(values = c("black", "green"),
+                   name = "Observed") +
+theme_bw () + 
+theme(axis.text.x = element_text(size = 6),
+      axis.text.y = element_text(size = 7.5),
+      legend.text = element_text(size = 10),
+      plot.title = element_text(size = 12, hjust = 0.5), 
+      panel.grid.major = element_blank()) +
+ggtitle("Distribution of observer trips, 4VS") +
+scale_x_continuous(breaks = c(-58, -59, -60),
+                   labels = parse(text = c("58 * degree * W", "NA", "60 * degree * W"))) +
+scale_y_continuous(breaks = c(44, 44.5, 45),
+                   labels = parse(text = c("44 * degree * N", "NA", "45 * degree * N"))) +
+facet_wrap(~f.year, ncol = 4) +
+ylab("") +
+xlab("")
+
+```
+
+
+```{r, p4, echo=FALSE}
+
+ggplot(subset(obsmarfis, obsmarfis$zone == "SWNB"), aes(x = doy, y = landings)) +
+geom_point(aes(col = observed), size = 0.75) +
+facet_wrap(~f.year, ncol = 4) + 
+scale_colour_manual(values = c("black", "green"),
+                    name = "Observed") +
+xlab("Day of year") +
+ylab("Landings per set (metric tons)") + 
+ggtitle("SWNB seacucumber landings per fishing season") + 
+theme_bw() +
+theme(axis.line = element_line(colour = "black"),
+      axis.text = element_text(size = 7.5),
+      axis.title = element_text(size = 9),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12, hjust = 0.5)) +
+scale_y_continuous(breaks = c(0, 10000, 20000, 30000),
+                   labels = parse(text = c("0", "10", "20", "30")))
+
+```
+
+```{r, p5, echo=FALSE}
+
+ggplot(subset(obsmarfis, obsmarfis$zone == "4W"), aes(x = doy, y = landings)) +
+geom_point(aes(col = observed), size = 0.75) +
+facet_wrap(~f.year, ncol = 4) + 
+scale_colour_manual(values = c("black", "green"),
+                    name = "Observed") +
+xlab("Day of year") +
+ylab("Landings per set (metric tons)") + 
+ggtitle("4W seacucumber landings per fishing season") + 
+theme_bw() +
+theme(axis.line = element_line(colour = "black"),
+      axis.text = element_text(size = 7.5),
+      axis.title = element_text(size = 9),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12, hjust = 0.5)) +
+scale_y_continuous(breaks = c(0, 25000, 50000),
+                   labels = parse(text = c("0", "25", "50")))
+
+```
+
+```{r, p6, echo=FALSE}
+
+ggplot(subset(obsmarfis, obsmarfis$zone == "4W"), aes(x = doy, y = landings)) +
+geom_point(aes(col = observed), size = 0.75) +
+facet_wrap(~f.year, ncol = 4) + 
+scale_colour_manual(values = c("black", "green"),
+                    name = "Observed") +
+xlab("Day of year") +
+ylab("Landings per set (metric tons)") + 
+ggtitle("4Vs seacucumber landings per fishing season") + 
+theme_bw() +
+theme(axis.line = element_line(colour = "black"),
+      axis.text = element_text(size = 7.5),
+      axis.title = element_text(size = 9),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12, hjust = 0.5)) +
+scale_y_continuous(breaks = c(0, 25000, 50000),
+                   labels = parse(text = c("0", "25", "50")))
+
+```
+
+
+
